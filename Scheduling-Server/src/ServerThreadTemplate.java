@@ -4,14 +4,14 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
-class ServerThread extends Thread {
+class ServerThreadTemplate extends Thread {
 
     String line = null;
     BufferedReader is = null;
     PrintWriter os = null;
     Socket s = null;
 
-    public ServerThread(Socket s) {
+    public ServerThreadTemplate(Socket s) {
         this.s = s;
     }
 
@@ -26,6 +26,7 @@ class ServerThread extends Thread {
 
         try {
             line = is.readLine();
+            System.out.println("Siema");
             while (line.compareTo("QUIT") != 0) {
 
                 os.println(line);

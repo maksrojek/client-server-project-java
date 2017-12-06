@@ -1,40 +1,45 @@
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.util.concurrent.*;
 
 public class Main {
 
-    static final int PORT_NUM = 4445;
+
 
     public static void main(String args[]) {
+        // server
+        /*
+        stwórz kolejkę blockingQueue1 KolejkaZadań do przekazywania zadań
+        hashmapa dostępności (obłożenie serverów)
+        hashmapę kolejek dla każdego servera obliczeniowego
+            - jeśli dołącza się server obliczeniowy tworzone są 2 wątki (in out), nowa
+            kolejaka (dodana do hashmapy)
+            oraz nowy wpis do hashmapy dostępności
 
 
-        Socket s = null;
-        ServerSocket ss2 = null;
-        System.out.println("Server Listening......");
-        try {
-            ss2 = new ServerSocket(PORT_NUM);
+        Stwórz executor z 3 wątkami
+            - komunikacja z klientem
+                - potrzebuje (blockinQueue1)
+            - odbieranie danych z kolejki
+                - potrzebuje BlockingQueue1
+                - potrzebuje Hashmapę kolejek
+                - potrzebuje hashmapę dostępności
+            - komunikacja z obliczeniowymi
+                - hashmapę dostępności
+                - hashmapę kolejek
+        czekaj na zakończenie tych wątków
+         */
 
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Server error");
+        BlockingQueue<Integer> taskQueue = new ArrayBlockingQueue<>(10);
+        ConcurrentHashMap<Integer, ClientTask> clientTaskMap = new ConcurrentHashMap<>();
+        TaskManager taskManager = new TaskManager();
+        ServerAvailability serverAvailability = new ServerAvailability();
 
-        }
+        ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(3);
+        executor.execute(new ClientExecutor(taskQueue, clientTaskMap));
+        executor.execute(new TaskScheduler(taskQueue, serverAvailability, taskManager));
+        executor.execute(new ComputeServerExecutor(clientTaskMap, serverAvailability, taskManager));
 
-        while (true) {
-            try {
-                s = ss2.accept();
-                System.out.println("connection Established");
-                ServerThread st = new ServerThread(s);
-                st.start();
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.out.println("Connection Error");
-
-            }
-        }
-
+//        executor.shutdown();
+        // tutaj powinno byc czekanie na cośtam od admina? wyłącz?
     }
 
 }
