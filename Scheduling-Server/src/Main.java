@@ -1,3 +1,4 @@
+import java.util.UUID;
 import java.util.concurrent.*;
 
 public class Main {
@@ -28,8 +29,8 @@ public class Main {
         czekaj na zakończenie tych wątków
          */
 
-        BlockingQueue<Integer> taskQueue = new ArrayBlockingQueue<>(10);
-        ConcurrentHashMap<Integer, ClientTask> clientTaskMap = new ConcurrentHashMap<>();
+        BlockingQueue<UUID> taskQueue = new ArrayBlockingQueue<>(10);
+        ConcurrentHashMap<UUID, ClientTask> clientTaskMap = new ConcurrentHashMap<>();
         TaskManager taskManager = new TaskManager();
         ServerAvailability serverAvailability = new ServerAvailability();
 

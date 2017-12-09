@@ -1,11 +1,12 @@
+import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 
 public class TaskScheduler implements Runnable{
-    private BlockingQueue<Integer> taskQueue;
+    private BlockingQueue<UUID> taskQueue;
     private ServerAvailability serverAvailability;
     private TaskManager taskManager;
 
-    public TaskScheduler(BlockingQueue<Integer> taskQueue, ServerAvailability
+    public TaskScheduler(BlockingQueue<UUID> taskQueue, ServerAvailability
             serverAvailability, TaskManager taskManager) {
         this.taskQueue = taskQueue;
         this.serverAvailability = serverAvailability;
