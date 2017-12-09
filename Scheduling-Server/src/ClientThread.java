@@ -81,6 +81,7 @@ public class ClientThread implements Runnable {
                 System.out.println("ClientID: " + clientID + ", message: " + line + ", " +
                         "taskID: " + taskID); // for debug
 
+                lock.lock();
                 condition.await();
                 System.out.println("Signal for: ClientID: " + clientID + ", message: "
                         + line + ", taskID: " + taskID); // for debug
