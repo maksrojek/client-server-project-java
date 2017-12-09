@@ -1,7 +1,8 @@
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ComputeServerExecutor implements Runnable {
-    public ComputeServerExecutor(ConcurrentHashMap<Integer, ClientTask> clientTaskMap,
+    public ComputeServerExecutor(ConcurrentHashMap<UUID, ClientTask> clientTaskMap,
                                  ServerAvailability serverAvailability, TaskManager
                                          taskManager) {
 
