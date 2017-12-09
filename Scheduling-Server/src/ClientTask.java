@@ -1,5 +1,8 @@
 import java.util.concurrent.locks.Condition;
 
+/**
+ * Store task to compute, condition to thread connected with that task and result of task
+ */
 public class ClientTask {
     private ComputeData computeData;
     private Condition condition;

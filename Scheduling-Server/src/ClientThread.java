@@ -9,6 +9,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * That class is responsible of communication with client. Receives task from client
+ * and sends results.
+ */
 public class ClientThread implements Runnable {
 
     // w konstruktorze id i mapa zadań
@@ -34,7 +38,8 @@ public class ClientThread implements Runnable {
     private ConcurrentHashMap<UUID, ClientTask> clientTaskMap;
     private int clientID;
 
-    public ClientThread(Socket s, BlockingQueue<UUID> taskQueue, ConcurrentHashMap<UUID, ClientTask> clientTaskMap, int clientID) {
+    public ClientThread(Socket s, BlockingQueue<UUID> taskQueue,
+                        ConcurrentHashMap<UUID, ClientTask> clientTaskMap, int clientID) {
         this.s = s;
         this.lock = new ReentrantLock();
         this.condition = lock.newCondition();
@@ -45,7 +50,14 @@ public class ClientThread implements Runnable {
         this.clientID = clientID;
     }
 
-
+    /**
+     * It works in endless loop:
+     * - receives task,
+     * - sends that task to task queue,
+     * - wait for result,
+     * - sends result to client.
+     * end loop
+     */
     @Override
     public void run() {
         try {
@@ -66,10 +78,12 @@ public class ClientThread implements Runnable {
                 clientTaskMap.put(taskID, clientTask);
                 taskQueue.put(taskID);
 
-                System.out.println("ClientID: " + clientID + ", message: " + line + ", taskID: " + taskID); // for debug
+                System.out.println("ClientID: " + clientID + ", message: " + line + ", " +
+                        "taskID: " + taskID); // for debug
 
                 condition.await();
-                System.out.println("Signal for: ClientID: " + clientID + ", message: " + line + ", taskID: " + taskID); // for debug
+                System.out.println("Signal for: ClientID: " + clientID + ", message: "
+                        + line + ", taskID: " + taskID); // for debug
 
                 os.println(line); // response to client
                 os.flush(); // send response
@@ -77,11 +91,13 @@ public class ClientThread implements Runnable {
             }
         } catch (IOException e) {
 
-//            line = this.getName(); //reused String line for getting thread name
+            //            line = this.getName(); //reused String line for getting
+            // thread name
             System.out.println("IO Error/ Client " + line + " terminated " +
                     "abruptly");
         } catch (NullPointerException e) {
-//            line = this.getName(); //reused String line for getting thread name
+            //            line = this.getName(); //reused String line for getting
+            // thread name
             System.out.println("Client " + line + " Closed");
         } catch (InterruptedException e) {
             System.out.println("Error in putting task into taksQueue");
