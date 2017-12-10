@@ -6,8 +6,7 @@ import java.net.Socket;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * That class is responsible of communication with client. Receives task from client
@@ -15,24 +14,10 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class ClientThread implements Runnable {
 
-    // w konstruktorze id i mapa zadań
-    // stworz nowy condition
-    // pobierz dane zadania ComputeData (skopiować z ServerThread)
-    // Stworz obiekt ClientTask(compute Data)
-    // dodaj obiekt client task do mapy
-    // wyślij id do kolejki zadań
-    // czekaj na sygnał
-    // jak dostaniesz sygnał
-    // wydobądź odpowiedź i wyślij ją do klienta
-
-
     private String line = null;
     private BufferedReader is = null;
     private PrintWriter os = null;
     private Socket s = null;
-
-    private ReentrantLock lock;
-    private Condition condition;
 
     private BlockingQueue<UUID> taskQueue;
     private ConcurrentHashMap<UUID, ClientTask> clientTaskMap;
@@ -41,10 +26,6 @@ public class ClientThread implements Runnable {
     public ClientThread(Socket s, BlockingQueue<UUID> taskQueue,
                         ConcurrentHashMap<UUID, ClientTask> clientTaskMap, int clientID) {
         this.s = s;
-        this.lock = new ReentrantLock();
-        this.condition = lock.newCondition();
-        // Maybe I should send Lock instead of Condition?
-        // and then use lock.unlock()?
         this.taskQueue = taskQueue;
         this.clientTaskMap = clientTaskMap;
         this.clientID = clientID;
@@ -71,22 +52,28 @@ public class ClientThread implements Runnable {
         try {
             line = is.readLine();
             while (line.compareTo("QUIT") != 0) {
+                // lock.lock();
                 // TODO data validation (line)
                 ComputeData computeData = new ComputeData(line);
-                ClientTask clientTask = new ClientTask(computeData, condition);
+                ClientTask clientTask = new ClientTask(computeData, new CountDownLatch
+                        (1));
                 UUID taskID = UUID.randomUUID();
                 clientTaskMap.put(taskID, clientTask);
                 taskQueue.put(taskID);
 
-                System.out.println("ClientID: " + clientID + ", message: " + line + ", " +
+                System.out.println("Sleep -> ClientID: " + clientID + ", message: " +
+                        line + ", " +
                         "taskID: " + taskID); // for debug
 
-                lock.lock();
-                condition.await();
-                System.out.println("Signal for: ClientID: " + clientID + ", message: "
-                        + line + ", taskID: " + taskID); // for debug
+                clientTask.getCountDownLatch().await();
 
-                os.println(line); // response to client
+                System.out.println("Wakeup -> ClientID: " + clientID + ", message: "
+                        + line + " result: " + clientTask.getComputeResult().getResult()
+                        + ", taskID: " + taskID); //
+                // for debug
+
+                os.println(clientTask.getComputeResult().getResult()); // response to
+                // client
                 os.flush(); // send response
                 line = is.readLine(); // wait for next message
             }

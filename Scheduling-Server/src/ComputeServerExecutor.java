@@ -1,10 +1,10 @@
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.UUID;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -45,7 +45,7 @@ public class ComputeServerExecutor implements Runnable {
                 (10);
         Socket socket = null;
         ServerSocket serverSocket = null;
-        System.out.println("Server Listening.....");
+        System.out.println("Listening for computing servers...");
         try {
             serverSocket = new ServerSocket(PORT_NUM);
         } catch (IOException e) {
@@ -65,11 +65,13 @@ public class ComputeServerExecutor implements Runnable {
                 os.println(serverID);
                 os.flush();
                 System.out.println("connection established, serverID: " + serverID);
-
-                taskManager.addServer(serverID);
+                ArrayBlockingQueue<UUID> blockingQueue = new ArrayBlockingQueue<UUID>(20);
+                taskManager.addServer(serverID, blockingQueue);
+                serverAvailability.addServer(serverID, 0.0f);
                 // create 2 threads: for input and for output
-                executor.execute(new ComputeOut(socket, clientTaskMap, taskManager));
-                executor.execute(new ComputeIn(socket, clientTaskMap));
+                executor.execute(new ComputeOut(socket, clientTaskMap, blockingQueue));
+                executor.execute(new ComputeIn(serverID, socket, clientTaskMap,
+                        serverAvailability));
             } catch (Exception e) {
                 e.printStackTrace();
                 System.out.println("Connection Error");

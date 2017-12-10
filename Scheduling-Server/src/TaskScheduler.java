@@ -4,7 +4,7 @@ import java.util.concurrent.BlockingQueue;
 /**
  * Get tasks from queue and puts them to least occupied compute server
  */
-public class TaskScheduler implements Runnable{
+public class TaskScheduler implements Runnable {
     private BlockingQueue<UUID> taskQueue;
     private ServerAvailability serverAvailability;
     private TaskManager taskManager;
@@ -18,19 +18,23 @@ public class TaskScheduler implements Runnable{
 
     @Override
     public void run() {
-        UUID taksID = UUID.randomUUID();
-        while(true) {
+        UUID taskID = UUID.randomUUID();
+        while (true) {
             try {
-                taksID = taskQueue.take();
+                // get task from taskQueue
+                taskID = taskQueue.take();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            System.out.println("TaskScheduler - task:"  + taksID);
+            System.out.println("TaskScheduler - task:" + taskID);
 
-            // pobierz elemencik z TaskQueue
-            // pobierz obciążenie z ServerAvailability
-            // przekaż id zadanie do taks manager
-            // obsługa błedu gdy
+            // get server with minimal load
+            String serverID = serverAvailability.getMinServer();
+            System.out.println("TaskScheduler: send task to server: " + serverID);
+
+            // send task to least occupied server
+            taskManager.putTask(serverID, taskID);
+            // TODO error handling
         }
     }
 

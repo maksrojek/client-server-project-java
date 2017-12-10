@@ -31,7 +31,7 @@ public class ClientExecutor implements Runnable {
         Socket socket = null;
         ServerSocket serverSocket = null;
         int clientID = 0;
-        System.out.println("Server Listening.....");
+        System.out.println("Listening for clients...");
         try {
             serverSocket = new ServerSocket(PORT_NUM);
         } catch (IOException e) {
