@@ -1,3 +1,7 @@
+/**
+ * Store data to compute.
+ * @param <T> data type
+ */
 public class ComputeData<T> {
     private T data;
 

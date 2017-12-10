@@ -11,7 +11,6 @@ public class Main {
 
     public static void main(String args[]) throws IOException {
 
-
         InetAddress address = InetAddress.getLocalHost();
         Socket s1 = null;
         String line = null;
@@ -36,12 +35,11 @@ public class Main {
         try {
             line = br.readLine();
             while (line.compareTo("QUIT") != 0) {
-                os.println(line);
+                os.println("test");
                 os.flush();
                 response = is.readLine();
                 System.out.println("Server Response : " + response);
                 line = br.readLine();
-
             }
 
 
