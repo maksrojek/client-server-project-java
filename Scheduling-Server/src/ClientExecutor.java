@@ -7,6 +7,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
+/**
+ * ClientExecutor creates thread for each client. Accepts connection from new client
+ * and then passes the control to new thread. It also counts clients.
+ */
 public class ClientExecutor implements Runnable {
 
     static final int PORT_NUM = 4445;
@@ -27,7 +31,7 @@ public class ClientExecutor implements Runnable {
         Socket socket = null;
         ServerSocket serverSocket = null;
         int clientID = 0;
-        System.out.println("Server Listening.....");
+        System.out.println("Listening for clients...");
         try {
             serverSocket = new ServerSocket(PORT_NUM);
         } catch (IOException e) {
