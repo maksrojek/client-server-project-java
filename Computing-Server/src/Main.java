@@ -37,13 +37,23 @@ public class Main {
         try {
             String serverID = is.readLine();
             ID = UUID.fromString(serverID);
+            System.out.println("Server registered: " + ID);
+            os.println("load");
+            os.flush();
+            os.println("1");
+            os.flush();
 
+            String taskID = null;
+            String task = null;
             while (true) {
-                line = is.readLine();
-                sleep(Integer.valueOf(line) * 1000);
-                os.println(ID.toString());
+                taskID = is.readLine();
+                task = is.readLine();
+                System.out.println("New : task: " + taskID + ", sleep: " + task);
+                sleep(Integer.valueOf(task) * 1000);
+                System.out.println("Done: task: " + taskID + ", slept: " + task);
+                os.println(taskID);
                 os.flush();
-                os.println("slept for " + line + " seconds");
+                os.println(task); // result
                 os.flush();
             }
 

@@ -35,7 +35,7 @@ public class Main {
         try {
             line = br.readLine();
             while (line.compareTo("QUIT") != 0) {
-                os.println("test");
+                os.println(line);
                 os.flush();
                 response = is.readLine();
                 System.out.println("Server Response : " + response);
