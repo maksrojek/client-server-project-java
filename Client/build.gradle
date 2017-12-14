@@ -1,0 +1,21 @@
+apply plugin: 'java'
+apply plugin: 'idea'
+
+repositories {
+    jcenter()
+    mavenCentral()
+}
+
+dependencies {
+    compile group: 'org.ejml', name: 'ejml-all', version: '0.32'
+}
+
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+    }
+}
