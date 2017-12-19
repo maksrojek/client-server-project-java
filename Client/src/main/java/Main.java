@@ -50,7 +50,7 @@ public class Main {
         SimpleMatrix response = null;
         try {
             line = br.readLine();
-            //TODO: check if 'line' is number or "QUIT", refuse others
+            //TODO: check if 'line' is number (>0) or "QUIT", refuse others
 
             while (line.compareTo("QUIT") != 0) {
                 //TODO: generate nxm and mxk matrices to increase complexity
