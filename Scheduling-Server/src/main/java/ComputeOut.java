@@ -1,6 +1,10 @@
+import org.ejml.simple.SimpleMatrix;
+
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,7 +16,8 @@ public class ComputeOut implements Runnable {
     ArrayBlockingQueue<UUID> blockingQueue;
     private Socket socket;
     private ConcurrentHashMap<UUID, ClientTask> clientTaskMap;
-    private PrintWriter os = null;
+//    private PrintWriter os = null;
+    private ObjectOutputStream oos = null;
 
     public ComputeOut(Socket socket, ConcurrentHashMap<UUID, ClientTask> clientTaskMap,
                       ArrayBlockingQueue<UUID> blockingQueue) {
@@ -25,30 +30,39 @@ public class ComputeOut implements Runnable {
     public void run() {
 
         try {
-            os = new PrintWriter(socket.getOutputStream());
+            oos = new ObjectOutputStream(socket.getOutputStream());
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        UUID taskID = null;
+        UUID taskID;
         while (true) {
             try {
                 taskID = blockingQueue.take();
                 System.out.println("ComputeOut: Get task from queue");
-                // get next task
             } catch (InterruptedException e) {
                 e.printStackTrace();
+                // TODO if taking was interrupted, what to do with the task?
+                continue;
             }
             ClientTask task = clientTaskMap.get(taskID);
-            ComputeData<String> computeData = task.getComputeData();
-            String data = computeData.getData();
-            os.println(taskID);
-            os.flush();
-            System.out.println("ComputeOut: TaskID send" + taskID);
-            os.println(data);
-            os.flush();
-            System.out.println("ComputeOut: Task data send" + task);
-        }
+            ComputeData computeData = task.getComputeData();
+            ArrayList<SimpleMatrix> data = (ArrayList<SimpleMatrix>) computeData
+                    .getData();
+
+             // sending UUID and task data to Computing Server
+            try {
+                oos.writeObject(taskID);
+                System.out.println("ComputeOut: TaskID sent " + taskID);
+                oos.writeObject(data);
+                System.out.println("ComputeOut: Task data sent " + "->matrices here<-");
+                oos.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.out.println("IO Error - ComputeOut while sending UUID/data");
+            }
+            //TODO add yield here?
+        } // end while
 
 
         // OBsługa errora jeślie dostanie powiadomienei ze zerwało połączenie, tutaj
