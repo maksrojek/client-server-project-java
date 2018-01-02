@@ -33,7 +33,7 @@ public class ComputeIn implements Runnable {
             // TODO
         }
         UUID taskID;
-        ComputeResult<DMatrixRMaj> result;
+        DMatrixRMaj result;
         String mode; //possible modes: result, load
         Float workload;
         while (true) {
@@ -45,11 +45,11 @@ public class ComputeIn implements Runnable {
                 if (mode.equals("result")) {
                     taskID = (UUID) ois.readObject();
                     System.out.println("ComputeIn taskID : " + taskID);
-                    result = (ComputeResult<DMatrixRMaj>) ois.readObject();
+                    result = (DMatrixRMaj) ois.readObject();
                     System.out.println("ComputeIn result: " + "->result matrix<-");
 
                     ClientTask clientTask = clientTaskMap.get(taskID);
-                    clientTask.setComputeResult(result);
+                    clientTask.setComputeResult(new ComputeResult<>(result));
                     clientTask.getCountDownLatch().countDown();
 
                 } else if (mode.equals("load")) {
@@ -61,9 +61,11 @@ public class ComputeIn implements Runnable {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+                break;
             } catch (ClassNotFoundException e) {
                 System.out.println("Error while reading objects from ois");
                 e.printStackTrace();
+                break;
             }
         } // end while
 
