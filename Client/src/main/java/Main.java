@@ -1,12 +1,11 @@
-import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.row.RandomMatrices_DDRM;
-import org.ejml.simple.SimpleMatrix;
-import sun.java2d.pipe.SpanShapeRenderer;
-
 import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Random;
+
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.RandomMatrices_DDRM;
 
 public class Main {
 
@@ -16,6 +15,17 @@ public class Main {
     public static DMatrixRMaj generateRandomSquareMatrix(int dimension, double
             minValue, double maxValue) {
         return RandomMatrices_DDRM.symmetric(dimension, minValue, maxValue, rand);
+    }
+
+
+    public static boolean compareResult(DMatrixRMaj A, DMatrixRMaj B, DMatrixRMaj C) {
+        int noRows = A.getNumRows();
+        int noCols = B.getNumCols();
+        DMatrixRMaj multResult = new DMatrixRMaj(noRows, noCols);
+        CommonOps_DDRM.mult(A, B, multResult);
+        System.out.println("Internal A and B multiplication result: ");
+        System.out.println(multResult);
+        return C.toString().equals(multResult.toString());
     }
 
     public static void printServerResponse(Object A, Object B, Object resp) {
@@ -66,6 +76,9 @@ public class Main {
                 oos.flush();
                 response = (DMatrixRMaj) ois.readObject();
                 printServerResponse(A, B, response);
+                System.out.println("Result is 'correct': " + compareResult(A, B,
+                        response));
+
                 line = br.readLine();
             }
 
