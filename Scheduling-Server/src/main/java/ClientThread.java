@@ -1,8 +1,8 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import org.ejml.data.DMatrixRMaj;
+
+import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,10 +14,9 @@ import java.util.concurrent.CountDownLatch;
  */
 public class ClientThread implements Runnable {
 
-    private String line = null;
-    private BufferedReader is = null;
-    private PrintWriter os = null;
-    private Socket s = null;
+    private ObjectInputStream ois = null;
+    private ObjectOutputStream oos = null;
+    private Socket s;
 
     private BlockingQueue<UUID> taskQueue;
     private ConcurrentHashMap<UUID, ClientTask> clientTaskMap;
@@ -42,64 +41,77 @@ public class ClientThread implements Runnable {
     @Override
     public void run() {
         try {
-            is = new BufferedReader(new InputStreamReader(s.getInputStream()));
-            os = new PrintWriter(s.getOutputStream());
+            ois = new ObjectInputStream(s.getInputStream());
+            oos = new ObjectOutputStream(s.getOutputStream());
+
 
         } catch (IOException e) {
             System.out.println("IO error in server thread");
         }
 
+        DMatrixRMaj A, B;
+
         try {
-            line = is.readLine();
-            while (line.compareTo("QUIT") != 0) {
+            A = (DMatrixRMaj) ois.readObject();
+            B = (DMatrixRMaj) ois.readObject();
+
+            while (true) {
                 // lock.lock();
-                // TODO data validation (line)
-                ComputeData computeData = new ComputeData(line);
+                // TODO data validation (A, B)
+                ArrayList<DMatrixRMaj> matrices = new ArrayList<>(2);
+                matrices.add(A);
+                matrices.add(B);
+                ComputeData computeData = new ComputeData(matrices);
                 ClientTask clientTask = new ClientTask(computeData, new CountDownLatch
                         (1));
                 UUID taskID = UUID.randomUUID();
                 clientTaskMap.put(taskID, clientTask);
                 taskQueue.put(taskID);
 
-                System.out.println("Sleep -> ClientID: " + clientID + ", message: " +
-                        line + ", " +
-                        "taskID: " + taskID); // for debug
+                System.out.println("Sleep -> ClientID: " + clientID + " taskID: " +
+                        taskID); // for debug
 
                 clientTask.getCountDownLatch().await();
 
-                System.out.println("Wakeup -> ClientID: " + clientID + ", message: "
-                        + line + " result: " + clientTask.getComputeResult().getResult()
-                        + ", taskID: " + taskID); //
+                System.out.println("Wakeup -> ClientID: " + clientID + " result: " +
+                        clientTask.getComputeResult().getResult() + ", taskID: " +
+                        taskID); //
                 // for debug
 
-                os.println(clientTask.getComputeResult().getResult()); // response to
-                // client
-                os.flush(); // send response
-                line = is.readLine(); // wait for next message
+                // send response to client
+                oos.writeObject(clientTask.getComputeResult().getResult());
+                // send response
+                oos.flush();
+                // wait for next message
+                A = (DMatrixRMaj) ois.readObject();
+                B = (DMatrixRMaj) ois.readObject();
             }
         } catch (IOException e) {
 
             //            line = this.getName(); //reused String line for getting
             // thread name
-            System.out.println("IO Error/ Client " + line + " terminated " +
+            System.out.println("IO Error/ Client " + clientID + " terminated " +
                     "abruptly");
         } catch (NullPointerException e) {
             //            line = this.getName(); //reused String line for getting
             // thread name
-            System.out.println("Client " + line + " Closed");
+            System.out.println("Client " + clientID + " Closed");
         } catch (InterruptedException e) {
-            System.out.println("Error in putting task into taksQueue");
+            System.out.println("Error in putting task into taskQueue");
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            System.out.println("Error while reading objects from ois");
             e.printStackTrace();
         } finally {
             try {
                 System.out.println("Connection Closing..");
-                if (is != null) {
-                    is.close();
+                if (ois != null) {
+                    ois.close();
                     System.out.println(" Socket Input Stream Closed");
                 }
 
-                if (os != null) {
-                    os.close();
+                if (oos != null) {
+                    oos.close();
                     System.out.println("Socket Out Closed");
                 }
                 if (s != null) {
