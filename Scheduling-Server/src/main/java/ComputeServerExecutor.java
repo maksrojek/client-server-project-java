@@ -1,6 +1,4 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.UUID;
@@ -16,7 +14,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class ComputeServerExecutor implements Runnable {
 
     static final int PORT_NUM = 4455;
-    private BufferedReader is = null;
     private PrintWriter os = null;
     private ConcurrentHashMap<UUID, ClientTask> clientTaskMap;
     private ServerAvailability serverAvailability;
@@ -30,20 +27,17 @@ public class ComputeServerExecutor implements Runnable {
         this.taskManager = taskManager;
     }
 
-    // @Override
-    // public void run() {
     // w pętli robi to samo co ClientExecutor ale tworzy 2 wątki dla jednego
     // servera i podaje im socket
     // ComputeServera In oraz Out - ComputeIn, ComputeOut. tworzy dla każdego nową
     // listę w TaskManager
     // i wystąpnie w ServerAvailability
     // i czeka na kolejne servery
-    // }
     @Override
     public void run() {
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool
                 (10);
-        Socket socket = null;
+        Socket socket;
         ServerSocket serverSocket = null;
         System.out.println("Listening for computing servers...");
         try {
@@ -54,8 +48,6 @@ public class ComputeServerExecutor implements Runnable {
 
         }
 
-
-        String line;
         String serverID;
         while (true) {
             try {
