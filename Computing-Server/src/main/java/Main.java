@@ -1,13 +1,15 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.UUID;
+import java.util.concurrent.*;
 
-import static java.lang.Thread.sleep;
-
+/**
+ * create BlockingQueue x2 - taskQueue and resultsQueue
+ * create synchronized object Availability
+ * create executor
+ * execute 3 threads
+ */
 public class Main {
 
     static final int PORT_NUM = 4455;
@@ -16,16 +18,13 @@ public class Main {
 
         InetAddress address = InetAddress.getLocalHost();
         Socket s1 = null;
-        String line = null;
         BufferedReader is = null;
-        PrintWriter os = null;
 
         UUID ID = null;
 
         try {
             s1 = new Socket(address, PORT_NUM);
             is = new BufferedReader(new InputStreamReader(s1.getInputStream()));
-            os = new PrintWriter(s1.getOutputStream());
         } catch (IOException e) {
             e.printStackTrace();
             System.err.print("IO Exception");
@@ -33,42 +32,31 @@ public class Main {
 
         System.out.println("Computing server address : " + address);
 
-        String response = null;
         try {
             String serverID = is.readLine();
             ID = UUID.fromString(serverID);
-            System.out.println("Server registered: " + ID);
-            os.println("load");
-            os.flush();
-            os.println("1");
-            os.flush();
+            System.out.println("Server registered, ID: " + ID);
 
-            String taskID = null;
-            String task = null;
-            while (true) {
-                taskID = is.readLine();
-                task = is.readLine();
-                System.out.println("New : task: " + taskID + ", sleep: " + task);
-                sleep(Integer.valueOf(task) * 1000);
-                System.out.println("Done: task: " + taskID + ", slept: " + task);
-                os.println(taskID);
-                os.flush();
-                os.println(task); // result
-                os.flush();
-            }
+            ConcurrentHashMap<UUID, ClientTask> clientTaskMap = new ConcurrentHashMap<>();
+            BlockingQueue<UUID> taskQueue = new ArrayBlockingQueue<>(10);
+            BlockingQueue<UUID> resultsQueue = new ArrayBlockingQueue<>(10);
+            Availability availability = new Availability();
 
+            ExecutorService executor = Executors.newFixedThreadPool(3);
+            executor.execute(new SchedulerIn(s1, ID, taskQueue, availability,
+                    clientTaskMap));
+            executor.execute(new SchedulerOut(s1, availability, clientTaskMap,
+                    resultsQueue));
+            executor.execute(new Compute(taskQueue, availability, clientTaskMap,
+                    resultsQueue));
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Socket read Error");
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } finally {
-            is.close();
-            os.close();
-            s1.close();
-            System.out.println("Connection Closed");
-
         }
 
+        // TODO when to close connection? cannot now because threads needs the socket
+//        is.close();
+//        s1.close();
+//        System.out.println("Connection Closed");
     }
 }
