@@ -1,3 +1,4 @@
+import org.ejml.data.DMatrixRMaj;
 import org.ejml.simple.SimpleMatrix;
 
 import java.io.IOException;
@@ -13,10 +14,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * Sends task to remote computing server
  */
 public class ComputeOut implements Runnable {
-    ArrayBlockingQueue<UUID> blockingQueue;
+    private ArrayBlockingQueue<UUID> blockingQueue;
     private Socket socket;
     private ConcurrentHashMap<UUID, ClientTask> clientTaskMap;
-//    private PrintWriter os = null;
     private ObjectOutputStream oos = null;
 
     public ComputeOut(Socket socket, ConcurrentHashMap<UUID, ClientTask> clientTaskMap,
@@ -33,9 +33,11 @@ public class ComputeOut implements Runnable {
             oos = new ObjectOutputStream(socket.getOutputStream());
         } catch (IOException e) {
             e.printStackTrace();
+            // TODO
         }
 
         UUID taskID;
+        ArrayList<DMatrixRMaj> data;
         while (true) {
             try {
                 taskID = blockingQueue.take();
@@ -47,10 +49,9 @@ public class ComputeOut implements Runnable {
             }
             ClientTask task = clientTaskMap.get(taskID);
             ComputeData computeData = task.getComputeData();
-            ArrayList<SimpleMatrix> data = (ArrayList<SimpleMatrix>) computeData
-                    .getData();
+            data = (ArrayList<DMatrixRMaj>) computeData.getData();
 
-             // sending UUID and task data to Computing Server
+            // sending UUID and task data to Computing Server
             try {
                 oos.writeObject(taskID);
                 System.out.println("ComputeOut: TaskID sent " + taskID);
