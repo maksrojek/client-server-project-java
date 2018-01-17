@@ -40,7 +40,7 @@ public class Main {
             ConcurrentHashMap<UUID, ClientTask> clientTaskMap = new ConcurrentHashMap<>();
             BlockingQueue<UUID> taskQueue = new ArrayBlockingQueue<>(10);
             BlockingQueue<UUID> resultsQueue = new ArrayBlockingQueue<>(10);
-            Availability availability = new Availability();
+            Availability availability = new Availability(UUID.fromString(serverID));
 
             ExecutorService executor = Executors.newFixedThreadPool(3);
             executor.execute(new SchedulerIn(s1, ID, taskQueue, availability,
@@ -53,8 +53,6 @@ public class Main {
             e.printStackTrace();
             System.out.println("Socket read Error");
         }
-
-        // TODO when to close connection? cannot now because threads needs the socket
 //        is.close();
 //        s1.close();
 //        System.out.println("Connection Closed");
