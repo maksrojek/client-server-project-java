@@ -1,9 +1,19 @@
+import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.*;
 
+
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
+
+
 public class Main {
 
-
+    private final static Logger LOGGER = Logger.getLogger(Main.class.getName());
+    static private FileHandler fileTxt;
+    static private SimpleFormatter formatterTxt;
 
     public static void main(String args[]) {
         // server
@@ -28,6 +38,11 @@ public class Main {
                 - hashmapę kolejek
         czekaj na zakończenie tych wątków
          */
+
+
+
+
+
 
         BlockingQueue<UUID> taskQueue = new ArrayBlockingQueue<>(10);
         ConcurrentHashMap<UUID, ClientTask> clientTaskMap = new ConcurrentHashMap<>();

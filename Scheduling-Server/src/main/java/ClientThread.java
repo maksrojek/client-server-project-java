@@ -73,9 +73,9 @@ public class ClientThread implements Runnable {
 
                 clientTask.getCountDownLatch().await();
 
-                System.out.println("Wakeup -> ClientID: " + clientID + " result: " +
-                        clientTask.getComputeResult().getResult() + ", taskID: " +
-                        taskID); //
+//                System.out.println("Wakeup -> ClientID: " + clientID + " result: " +
+//                        clientTask.getComputeResult().getResult() + ", taskID: " +
+//                        taskID); //
                 // for debug
 
                 // send response to client

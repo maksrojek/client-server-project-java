@@ -61,8 +61,10 @@ public class Main {
 
         String line;
         DMatrixRMaj A, B, response;
+        int counter = 0;
         try {
-            line = br.readLine();
+            line = String.valueOf(1000);
+//            line = br.readLine();
             //TODO: check if 'line' is number (>0) or "QUIT", refuse others
 
             while (line.compareTo("QUIT") != 0) {
@@ -75,11 +77,14 @@ public class Main {
                 oos.writeObject(B);
                 oos.flush();
                 response = (DMatrixRMaj) ois.readObject();
-                printServerResponse(A, B, response);
-                System.out.println("Result is 'correct': " + compareResult(A, B,
-                        response));
+                //printServerResponse(A, B, response);
+                //System.out.println("Result is 'correct': " + compareResult(A, B,
+                    //    response));
 
-                line = br.readLine();
+                //line = br.readLine();
+                if (counter >= 10) break;
+                counter++;
+                line = String.valueOf(1000);
             }
 
         } catch (IOException | ClassNotFoundException e) {
