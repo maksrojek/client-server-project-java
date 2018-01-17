@@ -2,12 +2,12 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Random;
-
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.RandomMatrices_DDRM;
+import org.ejml.ops.MatrixIO;
 
-public class Main {
+public class Main implements Serializable {
 
     static final int PORT_NUM = 4445;
     static Random rand = new Random();
@@ -57,50 +57,86 @@ public class Main {
         }
 
         System.out.println("Client Address : " + address);
+
+        // Oficial version
         System.out.println("Enter Data to echo Server ( Enter QUIT to end):");
-
-        String line;
         DMatrixRMaj A, B, response;
-        int counter = 0;
+        String file1, file2, result;
+
         try {
-            line = String.valueOf(1000);
-//            line = br.readLine();
-            //TODO: check if 'line' is number (>0) or "QUIT", refuse others
+            System.out.println("Enter the path to the first file: ");
+            file1 = br.readLine();
+            System.out.println("Enter the path to the second file: ");
+            file2 = br.readLine();
 
-            while (line.compareTo("QUIT") != 0) {
-                //TODO:import or generate nxm, mxk matrices to increase complexity
-                //generating random square matrices based on input
-                A = generateRandomSquareMatrix(Integer.parseInt(line), 1, 50);
-                B = generateRandomSquareMatrix(Integer.parseInt(line), 1, 50);
+            while (file1.compareTo("QUIT") != 0 && file2.compareTo("QUIT") != 0) {
 
+                A = MatrixIO.loadCSV(file1);
+                B = MatrixIO.loadCSV(file2);
                 oos.writeObject(A);
                 oos.writeObject(B);
                 oos.flush();
                 response = (DMatrixRMaj) ois.readObject();
-                //printServerResponse(A, B, response);
-                //System.out.println("Result is 'correct': " + compareResult(A, B,
-                    //    response));
 
-                //line = br.readLine();
-                if (counter >= 10) break;
-                counter++;
-                line = String.valueOf(1000);
+                printServerResponse(A, B, response);
+
+                System.out.println("Enter the path to the result file: ");
+                result = br.readLine();
+                MatrixIO.saveCSV(response, result);
+
+                System.out.println("Enter the path to the first file: ");
+                file1 = br.readLine();
+                System.out.println("Enter the path to the second file: ");
+                file2 = br.readLine();
             }
 
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
             System.out.println("Socket read Error");
         } finally {
-
             ois.close();
             oos.close();
             br.close();
             s1.close();
             System.out.println("Connection Closed");
-
         }
 
+        // Test version
+//        System.out.println("Working...");
+//
+//        String line;
+//        DMatrixRMaj A, B, response;
+//        int counter = 0;
+//        Random randomGenerator = new Random();
+//
+//        try {
+//            line = String.valueOf(randomGenerator.nextInt(1000));
+//
+//            while (line.compareTo("QUIT") != 0) {
+//                A = generateRandomSquareMatrix(Integer.parseInt(line), 1, 50);
+//                B = generateRandomSquareMatrix(Integer.parseInt(line), 1, 50);
+//
+//                oos.writeObject(A);
+//                oos.writeObject(B);
+//                oos.flush();
+//
+//                response = (DMatrixRMaj) ois.readObject();
+//
+//                line = String.valueOf(randomGenerator.nextInt(1000));
+//                if (counter >= 10) break;
+//                counter++;
+//            }
+//
+//        } catch (IOException | ClassNotFoundException e) {
+//            e.printStackTrace();
+//            System.out.println("Socket read Error");
+//        } finally {
+//            ois.close();
+//            oos.close();
+//            br.close();
+//            s1.close();
+//            System.out.println("Connection Closed");
+//
+//        }
     }
-
-
 }
