@@ -1,5 +1,3 @@
-import org.ejml.simple.SimpleMatrix;
-
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -9,12 +7,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class SchedulerOut implements Runnable {
-
-    // check id Availability object has been updated
-    // send availability if had been changed
-    // get result from ResultsQueue
-    // send result if exist
-
     private Socket socket;
     private Availability availability;
     private ConcurrentHashMap<UUID, ClientTask> clientTaskMap;
@@ -33,8 +25,6 @@ public class SchedulerOut implements Runnable {
 
     @Override
     public void run() {
-        // TODO add logs (by console println)
-
         try {
             oos = new ObjectOutputStream(socket.getOutputStream());
         } catch (IOException e) {

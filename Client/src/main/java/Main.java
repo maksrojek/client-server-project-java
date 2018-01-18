@@ -2,6 +2,7 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Random;
+
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.RandomMatrices_DDRM;
@@ -15,17 +16,6 @@ public class Main implements Serializable {
     public static DMatrixRMaj generateRandomSquareMatrix(int dimension, double
             minValue, double maxValue) {
         return RandomMatrices_DDRM.symmetric(dimension, minValue, maxValue, rand);
-    }
-
-
-    public static boolean compareResult(DMatrixRMaj A, DMatrixRMaj B, DMatrixRMaj C) {
-        int noRows = A.getNumRows();
-        int noCols = B.getNumCols();
-        DMatrixRMaj multResult = new DMatrixRMaj(noRows, noCols);
-        CommonOps_DDRM.mult(A, B, multResult);
-        System.out.println("Internal A and B multiplication result: ");
-        System.out.println(multResult);
-        return C.toString().equals(multResult.toString());
     }
 
     public static void printServerResponse(Object A, Object B, Object resp) {
@@ -58,8 +48,8 @@ public class Main implements Serializable {
 
         System.out.println("Client Address : " + address);
 
-        // Oficial version
-        System.out.println("Enter Data to echo Server ( Enter QUIT to end):");
+        // Production version
+        System.out.println("Client app ( Enter QUIT to end)");
         DMatrixRMaj A, B, response;
         String file1, file2, result;
 
@@ -73,16 +63,23 @@ public class Main implements Serializable {
 
                 A = MatrixIO.loadCSV(file1);
                 B = MatrixIO.loadCSV(file2);
-                oos.writeObject(A);
-                oos.writeObject(B);
-                oos.flush();
-                response = (DMatrixRMaj) ois.readObject();
+                if (A.getNumCols() != B.getNumRows()) {
+                    System.out.println("Please provide compatible matrices:");
+                    System.out.println("the product AB is defined only if the number of" +
+                            " columns in A\nis equal to the number of rows in B");
+                } else {
 
-                printServerResponse(A, B, response);
+                    oos.writeObject(A);
+                    oos.writeObject(B);
+                    oos.flush();
+                    response = (DMatrixRMaj) ois.readObject();
 
-                System.out.println("Enter the path to the result file: ");
-                result = br.readLine();
-                MatrixIO.saveCSV(response, result);
+                    printServerResponse(A, B, response);
+
+                    System.out.println("Enter the path to the result file: ");
+                    result = br.readLine();
+                    MatrixIO.saveCSV(response, result);
+                }
 
                 System.out.println("Enter the path to the first file: ");
                 file1 = br.readLine();
@@ -110,7 +107,7 @@ public class Main implements Serializable {
 //        Random randomGenerator = new Random();
 //
 //        try {
-//            line = String.valueOf(randomGenerator.nextInt(1000));
+//            line = String.valueOf(randomGenerator.nextInt(1000)+1);
 //
 //            while (line.compareTo("QUIT") != 0) {
 //                A = generateRandomSquareMatrix(Integer.parseInt(line), 1, 50);
@@ -123,7 +120,7 @@ public class Main implements Serializable {
 //                response = (DMatrixRMaj) ois.readObject();
 //
 //                line = String.valueOf(randomGenerator.nextInt(1000));
-//                if (counter >= 10) break;
+//                if (counter >= 30) break;
 //                counter++;
 //            }
 //

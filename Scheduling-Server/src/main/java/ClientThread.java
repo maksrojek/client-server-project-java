@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 
 /**
- * That class is responsible of communication with client. Receives task from client
+ * That class is responsible for communication with client. Receives task from client
  * and sends results.
  */
 public class ClientThread implements Runnable {
@@ -30,14 +30,6 @@ public class ClientThread implements Runnable {
         this.clientID = clientID;
     }
 
-    /**
-     * It works in endless loop:
-     * - receives task,
-     * - sends that task to task queue,
-     * - wait for result,
-     * - sends result to client.
-     * end loop
-     */
     @Override
     public void run() {
         try {
@@ -56,8 +48,6 @@ public class ClientThread implements Runnable {
             B = (DMatrixRMaj) ois.readObject();
 
             while (true) {
-                // lock.lock();
-                // TODO data validation (A, B)
                 ArrayList<DMatrixRMaj> matrices = new ArrayList<>(2);
                 matrices.add(A);
                 matrices.add(B);
@@ -68,15 +58,7 @@ public class ClientThread implements Runnable {
                 clientTaskMap.put(taskID, clientTask);
                 taskQueue.put(taskID);
 
-                System.out.println("Sleep -> ClientID: " + clientID + " taskID: " +
-                        taskID); // for debug
-
                 clientTask.getCountDownLatch().await();
-
-//                System.out.println("Wakeup -> ClientID: " + clientID + " result: " +
-//                        clientTask.getComputeResult().getResult() + ", taskID: " +
-//                        taskID); //
-                // for debug
 
                 // send response to client
                 oos.writeObject(clientTask.getComputeResult().getResult());
@@ -87,14 +69,9 @@ public class ClientThread implements Runnable {
                 B = (DMatrixRMaj) ois.readObject();
             }
         } catch (IOException e) {
-
-            //            line = this.getName(); //reused String line for getting
-            // thread name
             System.out.println("IO Error/ Client " + clientID + " terminated " +
                     "abruptly");
         } catch (NullPointerException e) {
-            //            line = this.getName(); //reused String line for getting
-            // thread name
             System.out.println("Client " + clientID + " Closed");
         } catch (InterruptedException e) {
             System.out.println("Error in putting task into taskQueue");

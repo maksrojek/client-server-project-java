@@ -45,18 +45,14 @@ public class ClientExecutor implements Runnable {
                 socket = serverSocket.accept();
                 System.out.println("connection established, clientId: " + clientID);
 
-                // create new thread for new client
-                // in constructor: socket, taskQueue, clientTaskMap, id
                 executor.execute(new ClientThread(socket, taskQueue, clientTaskMap,
                         clientID));
 
-                ++clientID; // new ID TODO UUID
+                ++clientID; // new ID
             } catch (Exception e) {
                 e.printStackTrace();
                 System.out.println("Connection Error");
-
             }
         }
-        //        TODO add executor close/shutdown
     }
 }

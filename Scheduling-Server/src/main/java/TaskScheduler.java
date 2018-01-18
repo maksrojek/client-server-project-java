@@ -34,8 +34,6 @@ public class TaskScheduler implements Runnable {
 
             // send task to least occupied server
             taskManager.putTask(serverID, taskID);
-            // TODO error handling
         }
     }
-
 }

@@ -1,12 +1,11 @@
 import java.io.IOException;
 import java.util.UUID;
-import java.util.logging.FileHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.*;
 
 public class Availability {
-    private Float value;
+    private volatile Float value;
+    ReentrantLock lock = new ReentrantLock();
 
     private final static Logger LOGGER = Logger.getLogger(Main.class.getName());
     static private FileHandler fileTxt;
@@ -21,25 +20,40 @@ public class Availability {
         this.value = value;
     }
 
-    public synchronized Float getValue() {
-        return value;
+    public Float getValue() {
+        lock.lock();
+        try {
+            return value;
+        } finally {
+            lock.unlock();
+        }
     }
 
-    public synchronized void increaseValueBy(Float value) {
-        this.value += value;
-        LOGGER.log(Level.INFO, String.valueOf(this.value));
+    public void increaseValueBy(Float value) {
+        lock.lock();
+        try {
+            this.value += value;
+            LOGGER.log(Level.INFO, String.valueOf(this.value));
+        } finally {
+            lock.unlock();
+        }
     }
 
-    public synchronized void decreaseValueBy(Float value){
-        this.value -= value;
-        if (this.value < 0)
-            this.value = 0f;
-        LOGGER.log(Level.INFO, String.valueOf(this.value));
+    public void decreaseValueBy(Float value) {
+        lock.lock();
+        try {
+            this.value -= value;
+            if (this.value < 0)
+                this.value = 0f;
+            LOGGER.log(Level.INFO, String.valueOf(this.value));
+        } finally {
+            lock.unlock();
+        }
     }
 
     private void createLogFile(UUID serverID) {
         try {
-            fileTxt = new FileHandler("Logging.txt");
+            fileTxt = new FileHandler("Logging");
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -4,12 +4,6 @@ import java.net.Socket;
 import java.util.UUID;
 import java.util.concurrent.*;
 
-/**
- * create BlockingQueue x2 - taskQueue and resultsQueue
- * create synchronized object Availability
- * create executor
- * execute 3 threads
- */
 public class Main {
 
     static final int PORT_NUM = 4455;
@@ -53,8 +47,5 @@ public class Main {
             e.printStackTrace();
             System.out.println("Socket read Error");
         }
-//        is.close();
-//        s1.close();
-//        System.out.println("Connection Closed");
     }
 }

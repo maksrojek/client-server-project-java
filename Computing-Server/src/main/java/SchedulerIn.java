@@ -1,6 +1,4 @@
 import org.ejml.data.DMatrixRMaj;
-import org.ejml.simple.SimpleMatrix;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
@@ -10,11 +8,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SchedulerIn implements Runnable {
-
-    // get task
-    // add to clientTaskMap
-    // send to TaskQueue
-    // update Availability object
 
     private Socket socket;
     private UUID serverID;
@@ -36,8 +29,6 @@ public class SchedulerIn implements Runnable {
 
     @Override
     public void run() {
-        // TODO add logs (by console println)
-
         try {
             ois = new ObjectInputStream(socket.getInputStream());
 
@@ -46,7 +37,7 @@ public class SchedulerIn implements Runnable {
         }
 
         ArrayList<DMatrixRMaj> data;
-        ClientTask clientTask = new ClientTask();
+        ClientTask clientTask;
         ComputeData computeData;
         int noRows, noCols;
         float complexity;
@@ -57,23 +48,23 @@ public class SchedulerIn implements Runnable {
             try {
                 // retrieve data from scheduler
                 taskID = (UUID) ois.readObject();
-                System.out.println("SchedulerIn: got TaskID: " + taskID);
                 data = (ArrayList<DMatrixRMaj>) ois.readObject();
 
                 computeData = new ComputeData(data);
+                clientTask = new ClientTask();
                 clientTask.setComputeData(computeData);
-
-                // send data for computing
-                clientTaskMap.put(taskID, clientTask);
-                taskQueue.put(taskID);
 
                 // calculate complexity
                 noRows = data.get(0).getNumRows();
                 noCols = data.get(1).getNumCols();
-                complexity = noRows * noCols / 2f;
+                complexity = noRows + noCols;
 
                 // update Availability
                 availability.increaseValueBy(complexity);
+
+                // send data for computing
+                clientTaskMap.put(taskID, clientTask);
+                taskQueue.put(taskID);
 
             } catch (IOException | ClassNotFoundException | InterruptedException e) {
                 e.printStackTrace();

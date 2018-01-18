@@ -11,12 +11,10 @@ public class TaskManager {
     private ConcurrentHashMap<String, BlockingQueue<UUID>> map;
 
     public TaskManager() {
-        // TODO max size in constructor
         this.map = new ConcurrentHashMap<>();
     }
 
     public void addServer(String serverID, ArrayBlockingQueue<UUID> blockingQueue) {
-        // TODO synchronization?
         map.put(serverID, blockingQueue);
     }
 
@@ -28,8 +26,4 @@ public class TaskManager {
             e.printStackTrace();
         }
     }
-
-
-    // wyjątki!
-    // jeśłi chce dodać do kolejki która nie istnieje
 }

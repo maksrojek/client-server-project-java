@@ -33,7 +33,6 @@ public class ComputeOut implements Runnable {
             oos = new ObjectOutputStream(socket.getOutputStream());
         } catch (IOException e) {
             e.printStackTrace();
-            // TODO
         }
 
         UUID taskID;
@@ -44,7 +43,6 @@ public class ComputeOut implements Runnable {
                 System.out.println("ComputeOut: Get task from queue");
             } catch (InterruptedException e) {
                 e.printStackTrace();
-                // TODO if taking was interrupted, what to do with the task?
                 continue;
             }
             ClientTask task = clientTaskMap.get(taskID);
@@ -62,11 +60,6 @@ public class ComputeOut implements Runnable {
                 e.printStackTrace();
                 System.out.println("IO Error - ComputeOut while sending UUID/data");
             }
-            //TODO add yield here?
         } // end while
-
-
-        // OBsługa errora jeślie dostanie powiadomienei ze zerwało połączenie, tutaj
-        // albo gdzieś indziej
     }
 }

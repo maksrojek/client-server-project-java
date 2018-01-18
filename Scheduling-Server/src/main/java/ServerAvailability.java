@@ -47,6 +47,4 @@ public class ServerAvailability {
         }
         return UUID;
     }
-
-
 }

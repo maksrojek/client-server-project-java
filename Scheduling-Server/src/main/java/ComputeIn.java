@@ -1,4 +1,5 @@
 import org.ejml.data.DMatrixRMaj;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
@@ -21,16 +22,12 @@ public class ComputeIn implements Runnable {
         this.serverAvailability = serverAvailability;
     }
 
-    // czeka na jakieś dane od ComputeServera i updatuje Availability lub wysyła
-    // wyniki (odczytanie z mapy Tasku i wpisanie do niego result i sygnał do
-    // Condition
     @Override
     public void run() {
         try {
             ois = new ObjectInputStream(socket.getInputStream());
         } catch (IOException e) {
             e.printStackTrace();
-            // TODO
         }
         UUID taskID;
         DMatrixRMaj result;
@@ -68,7 +65,5 @@ public class ComputeIn implements Runnable {
                 break;
             }
         } // end while
-
-
     }
 }
